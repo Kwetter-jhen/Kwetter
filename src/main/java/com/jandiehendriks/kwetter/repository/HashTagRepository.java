@@ -6,7 +6,6 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
-@Repository
 public interface HashTagRepository extends JpaRepository<HashTag, Long> {
     Optional<HashTag> findByText(String text);
 }
