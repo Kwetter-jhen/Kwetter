@@ -2,6 +2,7 @@ package com.jandiehendriks.kwetter.controller;
 
 import com.jandiehendriks.kwetter.domain.KwetterException;
 import com.jandiehendriks.kwetter.domain.KwetterUser;
+import com.jandiehendriks.kwetter.domain.Tweet;
 import com.jandiehendriks.kwetter.domain.UserType;
 import com.jandiehendriks.kwetter.service.AuthService;
 import com.jandiehendriks.kwetter.service.KwetterUserService;
@@ -87,6 +88,86 @@ public class KwetterUserController {
         }
     }
 
+    @RequestMapping(value = "/users/login",
+            method = RequestMethod.GET)
+    public ResponseEntity loginUser(
+            @RequestHeader String username,
+            @RequestHeader String password) {
+        try {
+            String token = kwetterUserService.loginKwetterUser(username,
+                    password);
+
+            return new ResponseEntity<>(token, HttpStatus.OK);
+        } catch (KwetterException | NoSuchAlgorithmException ex) {
+            log.error(ex.getMessage());
+
+            return new ResponseEntity<>(ex.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @RequestMapping(value = "/users/{username}/followers",
+            method = RequestMethod.GET)
+    public ResponseEntity getFollowers(
+            @PathVariable String username) {
+        try {
+            List<KwetterUser> followers =
+                    kwetterUserService
+                            .getUserByUsername(username)
+                            .getFollowers();
+
+            linkUtil.provideLinksForUser(followers);
+
+            return new ResponseEntity<>(followers, HttpStatus.OK);
+        } catch (KwetterException ex) {
+            log.error(ex.getMessage());
+
+            return new ResponseEntity<>(ex.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @RequestMapping(value = "/users/{username}/following",
+            method = RequestMethod.GET)
+    public ResponseEntity getFollowing(
+            @PathVariable String username) {
+        try {
+            List<KwetterUser> followers =
+                    kwetterUserService
+                            .getUserByUsername(username)
+                            .getFollowing();
+
+            linkUtil.provideLinksForUser(followers);
+
+            return new ResponseEntity<>(followers, HttpStatus.OK);
+        } catch (KwetterException ex) {
+            log.error(ex.getMessage());
+
+            return new ResponseEntity<>(ex.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @RequestMapping(value = "/users/{username}/relevanttweets",
+            method = RequestMethod.GET)
+    public ResponseEntity getRelevantTweets(
+            @PathVariable String username,
+            @RequestParam String token) {
+        try {
+            List<Tweet> tweets = kwetterUserService.getRelevantTweets(
+                    authService.getUserByToken(token), 100);
+
+            linkUtil.provideLinksForTweet(tweets);
+
+            return new ResponseEntity<>(tweets, HttpStatus.OK);
+        } catch (KwetterException ex) {
+            log.error(ex.getMessage());
+
+            return new ResponseEntity<>(ex.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @RequestMapping(value = "/users",
             method = RequestMethod.POST)
     public ResponseEntity registerUser(@RequestBody KwetterUser user,
@@ -103,6 +184,78 @@ public class KwetterUserController {
             return new ResponseEntity<>(newUser, HttpStatus.ACCEPTED);
         } catch (NoSuchAlgorithmException | KwetterException e) {
             return new ResponseEntity(HttpStatus.NOT_MODIFIED);
+        }
+    }
+
+    @RequestMapping(value = "/users/follow/{username}",
+            method = RequestMethod.PUT)
+    public ResponseEntity followUser(
+            @PathVariable String username,
+            @RequestParam String token) {
+        try {
+            KwetterUser user =
+                    kwetterUserService.addFollower(
+                            authService.getUserByToken(token),
+                            username);
+
+            linkUtil.provideLinksForUser(user);
+
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } catch (KwetterException ex) {
+            log.error(ex.getMessage());
+
+            return new ResponseEntity<>(ex.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @RequestMapping(value = "/users/update",
+            method = RequestMethod.PUT)
+    public ResponseEntity updateUser(
+            @RequestParam String token,
+            @RequestHeader String password,
+            @RequestBody KwetterUser kwetterUser) {
+        try {
+            KwetterUser user =
+                    kwetterUserService.updateUser(
+                            authService.getUserByToken(token),
+                            kwetterUser.getUsername(),
+                            kwetterUser.getEmail(),
+                            kwetterUser.getWebsite(),
+                            kwetterUser.getBio(),
+                            password
+                    );
+
+            linkUtil.provideLinksForUser(user);
+
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } catch (KwetterException | NoSuchAlgorithmException ex) {
+            log.error(ex.getMessage());
+
+            return new ResponseEntity<>(ex.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    @RequestMapping(value = "/users/admin",
+            method = RequestMethod.PUT)
+    public ResponseEntity makeAdmin(
+            @RequestParam String token,
+            @RequestBody KwetterUser kwetterUser) {
+        try {
+            KwetterUser user =
+                    kwetterUserService.makeAdmin(
+                            authService.getUserByToken(token),
+                            kwetterUser.getUsername());
+
+            linkUtil.provideLinksForUser(user);
+
+            return new ResponseEntity<>(user, HttpStatus.OK);
+        } catch (KwetterException ex) {
+            log.error(ex.getMessage());
+
+            return new ResponseEntity<>(ex.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
