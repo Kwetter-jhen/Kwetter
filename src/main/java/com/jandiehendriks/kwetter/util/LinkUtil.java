@@ -16,7 +16,7 @@ import java.util.List;
  * @author Jandie
  */
 public class LinkUtil {
-    private String mainUrl = "http://localhost:8080/Kwetter/api";
+    private String mainUrl = "https://kwetter-jhen-restless-bilby.cfapps.io";
     
     public KwetterUser provideLinksForUser(KwetterUser user) {
         List<Link> links = new ArrayList<>();

@@ -96,6 +96,7 @@ public class KwetterUserController {
         try {
             String token = kwetterUserService.loginKwetterUser(username,
                     password);
+            token = "\"" + token + "\"";
 
             return new ResponseEntity<>(token, HttpStatus.OK);
         } catch (KwetterException | NoSuchAlgorithmException ex) {
@@ -152,7 +153,7 @@ public class KwetterUserController {
             method = RequestMethod.GET)
     public ResponseEntity getRelevantTweets(
             @PathVariable String username,
-            @RequestParam String token) {
+            @RequestHeader String token) {
         try {
             List<Tweet> tweets = kwetterUserService.getRelevantTweets(
                     authService.getUserByToken(token), 100);
@@ -191,7 +192,7 @@ public class KwetterUserController {
             method = RequestMethod.PUT)
     public ResponseEntity followUser(
             @PathVariable String username,
-            @RequestParam String token) {
+            @RequestHeader String token) {
         try {
             KwetterUser user =
                     kwetterUserService.addFollower(
@@ -212,7 +213,7 @@ public class KwetterUserController {
     @RequestMapping(value = "/users/update",
             method = RequestMethod.PUT)
     public ResponseEntity updateUser(
-            @RequestParam String token,
+            @RequestHeader String token,
             @RequestHeader String password,
             @RequestBody KwetterUser kwetterUser) {
         try {
@@ -240,7 +241,7 @@ public class KwetterUserController {
     @RequestMapping(value = "/users/admin",
             method = RequestMethod.PUT)
     public ResponseEntity makeAdmin(
-            @RequestParam String token,
+            @RequestHeader String token,
             @RequestBody KwetterUser kwetterUser) {
         try {
             KwetterUser user =
