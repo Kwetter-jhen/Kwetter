@@ -1,0 +1,16 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: kwetter-app-deployment
+spec:
+  replicas: 1
+  template:
+      metadata:
+        labels:
+            app: kwetter-app
+      spec:
+        containers:
+        - name: kwetter-app
+          image: eidnaj/kwetter
+          ports:
+          - containerPort: 8080
