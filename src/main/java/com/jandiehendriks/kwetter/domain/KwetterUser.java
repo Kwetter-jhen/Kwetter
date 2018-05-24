@@ -61,6 +61,7 @@ public class KwetterUser implements Serializable {
     @Transient
     @JsonProperty("_links")
     private List<Link> links;
+    @JsonIgnore
     private String billingId;
     
     public KwetterUser() {

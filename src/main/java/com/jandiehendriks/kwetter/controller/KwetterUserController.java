@@ -88,6 +88,31 @@ public class KwetterUserController {
         }
     }
 
+    @RequestMapping(value = "/users/{username}/billingid",
+            method = RequestMethod.GET)
+    public ResponseEntity getBillingId(
+            @PathVariable String username,
+            @RequestHeader String token) {
+        try {
+            KwetterUser authUser = authService.getUserByToken(token);
+            KwetterUser user =
+                    kwetterUserService.getUserByUsername(username);
+
+            if (!authUser.getUsername().equals(username) &&
+                    authUser.getUserType() != UserType.ADMIN)
+                throw new KwetterException("You dont have permision to get this information");
+
+            return new ResponseEntity<>(
+                    "\"" + user.getBillingId() + "\"",
+                    HttpStatus.OK);
+        } catch (KwetterException ex) {
+            log.error(ex.getMessage());
+
+            return new ResponseEntity<>(ex.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @RequestMapping(value = "/users/login",
             method = RequestMethod.GET)
     public ResponseEntity loginUser(
