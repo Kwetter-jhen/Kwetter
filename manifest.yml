@@ -7,5 +7,6 @@ applications:
   random-route: true
   buildpack: java_buildpack
   path: /build/libs/kwetter-0.0.1-SNAPSHOT.jar
-#  services:
-#    - kwetter-mysql
+  services:
+    - kwetter-mysql
+    - kwetter-mq
