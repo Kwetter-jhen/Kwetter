@@ -22,6 +22,7 @@ public class BillingUpdateReceiver {
     @RabbitHandler
     public void receive(String message) {
         UserDto userDto = jsonUtil.decode(message, UserDto.class);
+        log.info("Received message: " + message);
 
         try {
             kwetterUserService.updateBillingInfo(
