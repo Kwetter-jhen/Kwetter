@@ -4,8 +4,11 @@ import com.jandiehendriks.kwetter.domain.KwetterException;
 import com.jandiehendriks.kwetter.domain.KwetterUser;
 import com.jandiehendriks.kwetter.domain.Tweet;
 import com.jandiehendriks.kwetter.domain.UserType;
+import com.jandiehendriks.kwetter.messaging.RegistrationSender;
 import com.jandiehendriks.kwetter.repository.KwetterUserRepository;
 import com.jandiehendriks.kwetter.util.HashUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -20,12 +23,17 @@ import java.util.Optional;
  */
 @Service
 public class KwetterUserService {
+    private static final Logger log =
+            LoggerFactory.getLogger(KwetterUserService.class);
 
-    private KwetterUserRepository kwetterUserRepository;
+    private final RegistrationSender registrationSender;
+    private final KwetterUserRepository kwetterUserRepository;
 
     @Autowired
-    public KwetterUserService(KwetterUserRepository kwetterUserRepository) {
+    public KwetterUserService(KwetterUserRepository kwetterUserRepository,
+                              RegistrationSender registrationSender) {
         this.kwetterUserRepository = kwetterUserRepository;
+        this.registrationSender = registrationSender;
     }
 
     public List<KwetterUser> getAllUsers() {
@@ -94,6 +102,9 @@ public class KwetterUserService {
         String token = hashUtil.generateSalt();
         KwetterUser user = new KwetterUser(username, email, website, bio, hashedPassword, salt, token);
 
+        registrationSender.send(user);
+        log.info("User registered!");
+
         return kwetterUserRepository.save(user);
     }
 
@@ -120,6 +131,15 @@ public class KwetterUserService {
         userToUpdate.setSalt(salt);
 
         return kwetterUserRepository.save(userToUpdate);
+    }
+
+    public void updateBillingInfo(String username, String billingId)
+            throws KwetterException {
+        KwetterUser userToUpdate = getUserByUsername(username);
+
+        userToUpdate.setBillingId(billingId);
+
+        kwetterUserRepository.save(userToUpdate);
     }
 
     public KwetterUser makeAdmin(KwetterUser authUser, String username) throws KwetterException {

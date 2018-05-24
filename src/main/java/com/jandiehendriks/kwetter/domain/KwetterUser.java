@@ -61,6 +61,7 @@ public class KwetterUser implements Serializable {
     @Transient
     @JsonProperty("_links")
     private List<Link> links;
+    private String billingId;
     
     public KwetterUser() {
     }
@@ -191,7 +192,15 @@ public class KwetterUser implements Serializable {
     public void setLinks(List<Link> links) {
         this.links = links;
     }
-    
+
+    public String getBillingId() {
+        return billingId;
+    }
+
+    public void setBillingId(String billingId) {
+        this.billingId = billingId;
+    }
+
     @Override
     public int hashCode() {
         int hash = 0;
